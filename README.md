@@ -1,76 +1,18 @@
-[
-  {
-    "id": 0,
-    "name": "default",
-    "createdAt": 1729394163186,
-    "sortBy": "m:asc",
-    "colors": [
-      {
-        "hex": "#ddf0da",
-        "source": "ed",
-        "captured": "2024-10-20T03:17:33.702Z"
-      },
-      {
-        "hex": "#dbf2d8",
-        "source": "ed",
-        "captured": "2024-10-20T03:17:44.939Z"
-      },
-      {
-        "hex": "#bbe4b4",
-        "source": "ed",
-        "captured": "2024-10-20T03:18:02.610Z"
-      },
-      {
-        "hex": "#4a7c76",
-        "source": "ed",
-        "captured": "2024-10-20T03:18:11.342Z"
-      },
-      {
-        "hex": "#783e44",
-        "source": "ed",
-        "captured": "2024-10-20T03:18:18.183Z"
-      },
-      {
-        "hex": "#343e35",
-        "source": "ed",
-        "captured": "2024-10-20T03:18:31.704Z"
-      },
-      {
-        "hex": "#b3b3b3",
-        "source": "ed",
-        "captured": "2024-10-20T03:18:42.372Z"
-      },
-      {
-        "hex": "#09050b",
-        "source": "ed",
-        "captured": "2024-10-20T03:18:51.548Z"
-      },
-      {
-        "hex": "#547076",
-        "source": "ed",
-        "captured": "2024-10-20T03:19:00.165Z"
-      },
-      {
-        "hex": "#09a4a1",
-        "source": "ed",
-        "captured": "2024-10-20T03:19:15.733Z"
-      },
-      {
-        "hex": "#efab24",
-        "source": "ed",
-        "captured": "2024-10-20T03:19:19.739Z"
-      },
-      {
-        "hex": "#e33330",
-        "source": "ed",
-        "captured": "2024-10-20T03:19:23.189Z"
-      },
-      {
-        "hex": "#57b344",
-        "source": "ed",
-        "captured": "2024-10-20T03:19:27.315Z"
-      }
-    ]
-  }
-]
-    
+
+<palette>
+  <color name="Nyanza" hex="dbf2d8" r="219" g="242" b="216" />
+  <color name="Celadon" hex="bbe4b4" r="187" g="228" b="180" />
+  <color name="Cordovan" hex="783e44" r="120" g="62" b="68" />
+  <color name="Oxford Blue" hex="030027" r="3" g="0" b="39" />
+  <color name="Buff" hex="dc9e82" r="220" g="158" b="130" />
+  <color name="Hooker's green" hex="4a7c76" r="74" g="124" b="118" />
+  <color name="Black olive" hex="343e35" r="52" g="62" b="53" />
+  <color name="Silver" hex="b3b3b3" r="179" g="179" b="179" />
+  <color name="Ultra Violet" hex="724e91" r="114" g="78" b="145" />
+  <color name="Blush" hex="e54f6d" r="229" g="79" b="109" />
+  <color name="Light sea green" hex="09a4a1" r="9" g="164" b="161" />
+  <color name="Harvest gold" hex="efab24" r="239" g="171" b="36" />
+  <color name="Red (CMYK)" hex="e33330" r="227" g="51" b="48" />
+  <color name="Kelly green" hex="57b344" r="87" g="179" b="68" />
+  <color name="Space cadet" hex="1f2041" r="31" g="32" b="65" />
+</palette>
