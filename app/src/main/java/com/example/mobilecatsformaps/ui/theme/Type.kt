@@ -5,35 +5,86 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
 import com.example.mobilecatsformaps.R
 
 val myFontFamily = FontFamily(Font(R.font.nunito))
 
-
-// Set of Material typography styles to start with
+// Define your typography styles
 val Typography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 36.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 30.sp
+    ),
+    displaySmall = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 24.sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 20.sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 18.sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp
+    ),
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = myFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontSize = 16.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = myFontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+        fontSize = 14.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = myFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = myFontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        fontSize = 10.sp
     )
-    */
+)
+
+// Additional styles for specific cases
+val CurvedTextStyle = TextStyle(
+    fontFamily = myFontFamily,
+    fontWeight = FontWeight.Medium,
+    fontSize = 14.sp,
+    textDecoration = TextDecoration.Underline
+)
+
+val LargeTextStyle = TextStyle(
+    fontFamily = myFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = 40.sp
 )
