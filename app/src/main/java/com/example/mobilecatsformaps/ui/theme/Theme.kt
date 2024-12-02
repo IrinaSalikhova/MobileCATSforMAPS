@@ -15,10 +15,10 @@ import com.example.mobilecatsformaps.ui.theme.*
 private val LightColorScheme = lightColorScheme(
     primary = LineColor,
     onPrimary = BackgroundColor,
-    secondary = ButtonColor,
-    onSecondary = BackgroundColor,
+    secondary = ElementsColor,
+    onSecondary = TextColor,
     background = BackgroundColor,
-    surface = ElementsColor,
+    surface = LineColor,
     onSurface = TextColor
 )
 
