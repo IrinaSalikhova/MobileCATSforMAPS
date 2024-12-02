@@ -55,24 +55,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Column {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier,
-        fontSize = 24.sp
-
-    )
-    Text(
-        text = "Hello $name!",
-        modifier = modifier,
-        color = TextColor,
-        fontFamily = myFontFamily,
-        fontSize = 24.sp
-
-    )}
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
