@@ -1,5 +1,6 @@
 package com.example.mobilecatsformaps
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,12 +13,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.mobilecatsformaps.database.AssetDatabase
+import com.example.mobilecatsformaps.database.CategorySeeder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun SearchScreen(navController: NavHostController, userId: String?) {
+    val context = LocalContext.current
+    val database = AssetDatabase.getInstance(context)
+
+    CoroutineScope(Dispatchers.IO).launch {
+        val categories = database.categoryDao().getAllCategories()
+        val assets = database.assetDao().getAllAssets()
+        Log.d("DatabaseCheck", "Categories in the database: $categories")
+        Log.d("DatabaseCheck", "Assets in the database: $assets")
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()

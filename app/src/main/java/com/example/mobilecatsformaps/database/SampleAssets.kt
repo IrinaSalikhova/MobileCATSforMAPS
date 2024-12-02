@@ -1,5 +1,7 @@
 package com.example.mobilecatsformaps.database
 
+import com.google.gson.Gson
+
 class SampleAssets {
     fun getSampleAssets(): List<Asset> {
         return listOf(
@@ -13,7 +15,7 @@ class SampleAssets {
 
     val asset1 = Asset(
         name = "Ottawa Community Health Center",
-        category = "Health, Social, Support",
+        category = Gson().toJson(listOf("Primary Health Care", "Mental Health", "Health organizations")),
         latitude = 45.4215,
         longitude = -75.6972,
         address = "123 Main Street, Ottawa, ON",
@@ -31,7 +33,7 @@ class SampleAssets {
 
     val asset2 = Asset(
         name = "Ottawa Food Bank",
-        category = "Food, Support, Community",
+        category = Gson().toJson(listOf("Hygiene products", "Food security", "Food bank")),
         latitude = 45.4215,
         longitude = -75.6981,
         address = "860 Industrial Avenue, Ottawa, ON",
@@ -49,7 +51,7 @@ class SampleAssets {
 
     val asset3 = Asset(
         name = "Ottawa Library - Main Branch",
-        category = "Education, Community, Culture",
+        category = Gson().toJson(listOf("Libraries", "Cards & Games", "Arts & Crafts", "Book clubs", "Social clubs")),
         latitude = 45.4215,
         longitude = -75.6925,
         address = "120 Metcalfe Street, Ottawa, ON",
@@ -67,7 +69,7 @@ class SampleAssets {
 
     val asset4 = Asset(
         name = "The Good Companions Centre",
-        category = "Health, Social, Support",
+        category = Gson().toJson(listOf("Social clubs", "Arts & Crafts", "Peer support", "Home support", "Counselling", "Harm Reduction")),
         latitude = 45.3955,
         longitude = -75.7035,
         address = "670 Albert Street, Ottawa, ON",
@@ -85,7 +87,7 @@ class SampleAssets {
 
     val asset5 = Asset(
         name = "Ottawa Rideau Transit Service",
-        category = "Transportation, Community, Accessibility",
+        category = Gson().toJson(listOf("Transportation")),
         latitude = 45.4215,
         longitude = -75.6995,
         address = "2301-2305 Riverside Drive, Ottawa, ON",

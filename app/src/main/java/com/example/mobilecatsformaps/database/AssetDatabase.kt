@@ -5,14 +5,16 @@ import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [Asset::class], version = 1, exportSchema = false)
+@Database(entities = [Asset::class, Category::class], version = 1, exportSchema = false)
 abstract class AssetDatabase : RoomDatabase() {
     abstract fun assetDao(): AssetDao
+    abstract fun categoryDao(): CategoryDao
 
     companion object {
         const val DATABASE_NAME = "asset_database"
@@ -22,6 +24,7 @@ abstract class AssetDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): AssetDatabase {
             return INSTANCE ?: synchronized(this) {
+
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AssetDatabase::class.java,
@@ -39,6 +42,13 @@ abstract class AssetDatabase : RoomDatabase() {
                                     Log.d("AssetDatabase", "Pre-populated asset: ${asset.name}")
                                 }                               
                             }
+                            // Pre-populate the database with categories
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val categoryDao = INSTANCE?.categoryDao()
+                                val categorySeeder = CategorySeeder(categoryDao!!)
+                                categorySeeder.seedCategories()
+                            }
+
                         }
                     })
                     .build()
