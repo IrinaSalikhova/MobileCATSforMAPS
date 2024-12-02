@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mobilecatsformaps.HomeScreen
 import com.example.mobilecatsformaps.AddAssetScreen
 import com.example.mobilecatsformaps.AssetDetailsScreen
+import com.example.mobilecatsformaps.AssetListScreen
 import com.example.mobilecatsformaps.LoginScreen
 import com.example.mobilecatsformaps.SearchScreen
 
@@ -37,6 +38,7 @@ fun AppNavigation(startDestination: String = "searchScreen", context: Context) {
             val userId = navBackStackEntry.arguments?.getString("userId")
             HomeScreen(navController = navController, userId = userId)
         }
+        composable("assetListScreen") { AssetListScreen(navController = navController) }
     }
 }
 

@@ -28,6 +28,7 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
     val context = LocalContext.current
     val database = AssetDatabase.getInstance(context)
 
+
     CoroutineScope(Dispatchers.IO).launch {
         val categories = database.categoryDao().getAllCategories()
         val assets = database.assetDao().getAllAssets()
@@ -63,6 +64,18 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
         ) {
             Text("Add New Asset")
         }
+        Spacer(modifier = Modifier.height(30.dp))
+
+        // Button to go to asset list
+        Button(
+            onClick = {
+                navController.navigate("assetListScreen") // Navigate to Add Asset screen
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Go to asset list screen")
+        }
         Spacer(modifier = Modifier.weight(1f))
     }
 }
+
