@@ -21,7 +21,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -44,19 +47,25 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
+import com.example.mobilecatsformaps.database.Asset
 import com.example.mobilecatsformaps.database.AssetDatabase
 import com.example.mobilecatsformaps.database.Category
 import com.example.mobilecatsformaps.database.CategorySeeder
+import com.example.mobilecatsformaps.database.buildDynamicCategoryQuery
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -65,23 +74,48 @@ import kotlinx.coroutines.withContext
 fun SearchScreen(navController: NavHostController, userId: String?) {
     val context = LocalContext.current
     val database = AssetDatabase.getInstance(context)
+    val assetDao = database.assetDao()
     var categories by remember { mutableStateOf<List<Category>>(emptyList()) }
+    var assetList by remember { mutableStateOf<List<Asset>>(emptyList()) }
     Log.d("DatabaseCheck2", "Categories in the database: $categories")
+    Log.d("DatabaseCheck2", "Assets in the database: $assetList")
+
+    var selectedCategories = remember { mutableStateOf<List<String>>(emptyList()) }
+    val throttledSelectedCategories = remember {
+        snapshotFlow { selectedCategories.value }
+            .distinctUntilChanged()
+    }
 
     LaunchedEffect(Unit) {
         val loadedcategories = withContext(Dispatchers.IO) {
             database.categoryDao().getAllCategories()
         }
         categories = loadedcategories
-        Log.d("DatabaseCheck", "Categories in the database: $categories")
+        Log.d("DatabaseCheck", "Categories in the database: $loadedcategories")
     }
     LaunchedEffect(Unit) {
         val loadedAssets = withContext(Dispatchers.IO) {
             database.assetDao().getAllAssets()
         }
+        assetList = loadedAssets
         Log.d("DatabaseCheck", "Assets in the database: $loadedAssets")
     }
 
+    LaunchedEffect(selectedCategories.value) {
+        throttledSelectedCategories.collectLatest { categories ->
+            val query = buildDynamicCategoryQuery(categories)
+            try {
+                val filteredAssets = withContext(Dispatchers.IO) {
+                    assetDao.getAssetsByDynamicQuery(query).firstOrNull() ?: emptyList()
+                }
+                assetList = filteredAssets
+                Log.d("Filtered assets", "Filtered assets: $filteredAssets")
+            }
+            catch (e: Exception) {
+                Log.e("Error", "Error fetching assets by category", e)
+            }
+        }
+    }
 
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val defaultLocation = LatLng(45.383313,-75.733428) //CCHC
@@ -140,7 +174,9 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
             FilterDropdown(
                 categories = categories,
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
-                onFilterChanged = { /* Handle filter changes */ }
+                onFilterChanged = { selected ->
+                    selectedCategories.value = selected
+                    Log.d("Selected categories:", "Selected categories: $selected") }
             )
 
             // Map View Placeholder
@@ -266,7 +302,7 @@ fun FilterDropdown(
                             modifier = Modifier.weight(1f)
                         )
                         Icon(
-                            imageVector = if (expandedParentCategory.value == parent.id) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            imageVector = if (expandedParentCategory.value == parent.id) Icons.Default.KeyboardArrowLeft else Icons.Default.ArrowDropDown,
                             contentDescription = null
                         )
                     }
