@@ -12,7 +12,8 @@ import com.example.mobilecatsformaps.AssetListScreen
 import com.example.mobilecatsformaps.LoginScreen
 import com.example.mobilecatsformaps.SearchScreen
 import com.example.mobilecatsformaps.database.AssetDatabase
-import com.example.mobilecatsformaps.database.ViewModel
+import com.example.mobilecatsformaps.database.AssetViewModel
+import com.example.mobilecatsformaps.database.CategoryViewModel
 
 
 @Composable
@@ -32,10 +33,11 @@ fun AppNavigation(startDestination: String = "searchScreen", context: Context) {
         composable("addAssetScreen?assetId={assetId}&userId={userId}") { navBackStackEntry ->
             val assetId = navBackStackEntry.arguments?.getString("assetId")
             val userId = navBackStackEntry.arguments?.getString("userId")
-            val viewModel = ViewModel(assetDao = AssetDatabase.getInstance(context).assetDao())
+            val assetviewModel = AssetViewModel(assetDao = AssetDatabase.getInstance(context).assetDao())
+            val categoryViewModel = CategoryViewModel(categoryDao = AssetDatabase.getInstance(context).categoryDao())
             AddAssetScreen(
                 navController = navController, assetId = assetId, userId = userId,
-                viewModel
+                assetviewModel, categoryViewModel
             )
         }
         composable("loginScreen") { LoginScreen(navController = navController) }

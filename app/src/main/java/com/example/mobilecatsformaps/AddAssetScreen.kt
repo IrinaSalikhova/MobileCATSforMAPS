@@ -1,8 +1,8 @@
 package com.example.mobilecatsformaps
 
+
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,21 +12,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExposedDropdownMenuBox
+import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.mobilecatsformaps.database.Asset
-import com.example.mobilecatsformaps.database.ViewModel
+import com.example.mobilecatsformaps.database.AssetViewModel
+import com.example.mobilecatsformaps.database.Category
+import com.example.mobilecatsformaps.database.CategoryViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -40,19 +48,23 @@ fun AddAssetScreen(
     navController: NavHostController,
     assetId: String?,
     userId: String?,
-    viewModel: ViewModel
+    assetViewModel: AssetViewModel,
+    categoryViewModel: CategoryViewModel
+
 ) {
     // Create a scroll state
     val scrollState = rememberScrollState()
-
     var assetName by remember { mutableStateOf(TextFieldValue()) }
-    var assetCategory by remember { mutableStateOf(TextFieldValue()) }
+    var selectedCategory by remember { mutableStateOf<Category?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+    val category by CategoryViewModel.category.observeAsState(initial = emptyList())
+
     var assetDescription by remember { mutableStateOf(TextFieldValue()) }
     var assetLocation by remember { mutableStateOf(TextFieldValue()) }
     var assetContact by remember { mutableStateOf(TextFieldValue()) }
     var hoursOfOperation by remember { mutableStateOf(TextFieldValue()) }
     var assetAddress by remember { mutableStateOf(TextFieldValue()) }
-    var assetApprovalStatus by remember { mutableStateOf(false) }
+    val assetApprovalStatus by remember { mutableStateOf(false) }
     var assetSocialWorkerNotes by remember { mutableStateOf(TextFieldValue()) }
     var assetRelatedServicesLinks by remember { mutableStateOf(TextFieldValue()) }
     var assetTargetFocusPopulation by remember { mutableStateOf(TextFieldValue()) }
@@ -60,12 +72,27 @@ fun AddAssetScreen(
     var assetRegistrationInfo by remember { mutableStateOf(TextFieldValue()) }
     var assetAccessibilityTransportation by remember { mutableStateOf(TextFieldValue()) }
     var assetVolunteeringOpportunities by remember { mutableStateOf(TextFieldValue()) }
+    val context = LocalContext.current
     // State for the selected location
-    var selectedLocation by remember { mutableStateOf(LatLng(45.38377643930254, -75.73336901286898)) }
+    var selectedLocation by remember {
+        mutableStateOf(
+            LatLng(
+                45.38377643930254,
+                -75.73336901286898
+            )
+        )
+    }
     // Map for selecting location
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(selectedLocation, 10f)
     }
+
+    // Fetch categories when the Composable is first composed
+    LaunchedEffect(Unit) {
+        categoryViewModel.fetchCategories()
+    }
+    // Use the categories directly from the ViewModel
+    val categories = categoryViewModel.categories
 
     Column(
         modifier = Modifier
@@ -89,12 +116,35 @@ fun AddAssetScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = assetCategory,
-            onValueChange = { assetCategory = it },
-            label = { Text("Category") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        // Dropdown for categories
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            TextField(
+                value = selectedCategory?.name ?: "",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Select Category") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                }
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                categories.forEach { category ->
+                    DropdownMenuItem(onClick = {
+                        selectedCategory = category
+                        expanded = false
+                        categoryViewModel.fetchSubcategories(category.id)
+                    }) {
+                        Text(text = category.name)
+                    }
+                }
+            }
+        }
 
         OutlinedTextField(
             value = assetDescription,
@@ -206,7 +256,7 @@ fun AddAssetScreen(
                 // Handle submit action
                 val asset = Asset(
                     name = assetName.text,
-                    category = assetCategory.text,
+                    category = selectedCategory?.name ?: "",
                     latitude = selectedLocation.latitude,
                     longitude = selectedLocation.longitude,
                     address = assetAddress.text,
@@ -221,12 +271,18 @@ fun AddAssetScreen(
                     accessibilityTransportation = assetAccessibilityTransportation.text,
                     volunteeringOpportunities = assetVolunteeringOpportunities.text
                 )
-
-                viewModel.submitAsset(asset)
+                // Show a Toast message with the input values
+                Toast.makeText(
+                    context,
+                    "Name: ${asset.name}\nlong: ${asset.longitude}\nlat: ${asset.latitude}",
+                    Toast.LENGTH_SHORT
+                ).show()
+                assetViewModel.submitAsset(asset)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Submit Asset")
+
         }
     }
 }
