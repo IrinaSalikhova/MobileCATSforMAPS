@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 
 import kotlinx.coroutines.launch
 
-class ViewModel(val assetDao: AssetDao) : ViewModel() {
+class AssetViewModel(val assetDao: AssetDao) : ViewModel() {
     fun submitAsset(asset: Asset) {
         viewModelScope.launch {
             val id = assetDao.insertAsset(asset)
