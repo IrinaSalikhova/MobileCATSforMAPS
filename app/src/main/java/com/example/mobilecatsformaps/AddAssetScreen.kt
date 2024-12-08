@@ -5,6 +5,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
@@ -23,9 +25,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
@@ -57,14 +61,27 @@ fun AddAssetScreen(
     var assetName by remember { mutableStateOf(TextFieldValue()) }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
     var expanded by remember { mutableStateOf(false) }
-    val category by CategoryViewModel.category.observeAsState(initial = emptyList())
+    val categories = listOf(
+        Category(1, "Administrative support"),
+        Category(2, "Community events"),
+        Category(3, "Transportation"),
+        Category(4, "Community organizations"),
+        Category(5, "Community places"),
+        Category(6, "Health Services"),
+        Category(7, "Social Services"),
+        Category(8, "Food Security"),
+        Category(9, "Basic Needs"),
+        Category(10, "Hobby"),
+        Category(11, "Sport and recreation"),
+        Category(12, "Private services")
+    )
 
     var assetDescription by remember { mutableStateOf(TextFieldValue()) }
     var assetLocation by remember { mutableStateOf(TextFieldValue()) }
     var assetContact by remember { mutableStateOf(TextFieldValue()) }
     var hoursOfOperation by remember { mutableStateOf(TextFieldValue()) }
     var assetAddress by remember { mutableStateOf(TextFieldValue()) }
-    val assetApprovalStatus by remember { mutableStateOf(false) }
+    var isApproved by remember { mutableStateOf(false) } // State for checkbox
     var assetSocialWorkerNotes by remember { mutableStateOf(TextFieldValue()) }
     var assetRelatedServicesLinks by remember { mutableStateOf(TextFieldValue()) }
     var assetTargetFocusPopulation by remember { mutableStateOf(TextFieldValue()) }
@@ -89,10 +106,10 @@ fun AddAssetScreen(
 
     // Fetch categories when the Composable is first composed
     LaunchedEffect(Unit) {
-        categoryViewModel.fetchCategories()
+        //categoryViewModel.fetchCategories()
     }
     // Use the categories directly from the ViewModel
-    val categories = categoryViewModel.categories
+    //val categories = listOf("Category 1", "Category 2", "Category 3")
 
     Column(
         modifier = Modifier
@@ -227,6 +244,13 @@ fun AddAssetScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = isApproved,
+                onCheckedChange = { isApproved = it }
+            )
+            Text(text = if (isApproved) "Approved" else "Pending")
+        }
 
         GoogleMap(
             modifier = Modifier
@@ -261,7 +285,7 @@ fun AddAssetScreen(
                     longitude = selectedLocation.longitude,
                     address = assetAddress.text,
                     contactInfo = assetContact.text,
-                    approvalStatus = assetApprovalStatus,
+                    approvalStatus = isApproved, // Use checkbox state
                     socialWorkerNotes = assetSocialWorkerNotes.text,
                     relatedServicesLinks = assetRelatedServicesLinks.text,
                     description = assetDescription.text,
@@ -274,7 +298,7 @@ fun AddAssetScreen(
                 // Show a Toast message with the input values
                 Toast.makeText(
                     context,
-                    "Name: ${asset.name}\nlong: ${asset.longitude}\nlat: ${asset.latitude}",
+                    "status: ${asset.approvalStatus}\nlong: ${asset.longitude}\nlat: ${asset.latitude}",
                     Toast.LENGTH_SHORT
                 ).show()
                 assetViewModel.submitAsset(asset)

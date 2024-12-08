@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CategoryViewModel(private val categoryDao: CategoryDao) : ViewModel() {
-    private val _categories = mutableStateListOf<Category>()
+class CategoryViewModel(val categoryDao: CategoryDao) : ViewModel() {
+    val _categories = mutableStateListOf<Category>()
     val categories: List<Category> get() = _categories
 
     fun fetchCategories() {

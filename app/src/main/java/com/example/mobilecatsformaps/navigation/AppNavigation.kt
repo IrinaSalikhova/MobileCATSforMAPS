@@ -37,7 +37,7 @@ fun AppNavigation(startDestination: String = "searchScreen", context: Context) {
             val categoryViewModel = CategoryViewModel(categoryDao = AssetDatabase.getInstance(context).categoryDao())
             AddAssetScreen(
                 navController = navController, assetId = assetId, userId = userId,
-                assetviewModel, categoryViewModel
+                assetviewModel, categoryViewModel,
             )
         }
         composable("loginScreen") { LoginScreen(navController = navController) }
