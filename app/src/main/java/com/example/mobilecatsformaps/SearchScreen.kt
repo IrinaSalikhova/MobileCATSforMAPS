@@ -18,14 +18,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -33,6 +36,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -50,7 +54,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
@@ -58,12 +66,14 @@ import com.example.mobilecatsformaps.database.Asset
 import com.example.mobilecatsformaps.database.AssetDatabase
 import com.example.mobilecatsformaps.database.Category
 import com.example.mobilecatsformaps.database.CategorySeeder
-import com.example.mobilecatsformaps.database.buildDynamicCategoryQuery
+import com.example.mobilecatsformaps.database.buildDynamicQuery
+
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -81,10 +91,7 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
     Log.d("DatabaseCheck2", "Assets in the database: $assetList")
 
     var selectedCategories = remember { mutableStateOf<List<String>>(emptyList()) }
-    val throttledSelectedCategories = remember {
-        snapshotFlow { selectedCategories.value }
-            .distinctUntilChanged()
-    }
+    var searchedWords = remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         val loadedcategories = withContext(Dispatchers.IO) {
@@ -93,17 +100,9 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
         categories = loadedcategories
         Log.d("DatabaseCheck", "Categories in the database: $loadedcategories")
     }
-    LaunchedEffect(Unit) {
-        val loadedAssets = withContext(Dispatchers.IO) {
-            database.assetDao().getAllAssets()
-        }
-        assetList = loadedAssets
-        Log.d("DatabaseCheck", "Assets in the database: $loadedAssets")
-    }
 
-    LaunchedEffect(selectedCategories.value) {
-        throttledSelectedCategories.collectLatest { categories ->
-            val query = buildDynamicCategoryQuery(categories)
+    LaunchedEffect(selectedCategories.value to searchedWords.value) {
+            val query = buildDynamicQuery(selectedCategories.value, searchedWords.value)
             try {
                 val filteredAssets = withContext(Dispatchers.IO) {
                     assetDao.getAssetsByDynamicQuery(query).firstOrNull() ?: emptyList()
@@ -114,7 +113,6 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
             catch (e: Exception) {
                 Log.e("Error", "Error fetching assets by category", e)
             }
-        }
     }
 
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -155,7 +153,17 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
-                modifier = Modifier.height(60.dp)
+                modifier = Modifier.height(60.dp),
+                actions = {
+                    // Add Asset Button
+                    IconButton(onClick = { navController.navigate("addAssetScreen") }) {
+                        Icon(
+                            imageVector = Icons.Default.Add, // Use a suitable icon like "Add"
+                            contentDescription = "Add New Asset",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -166,7 +174,11 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
         ) {
             // Search Bar
             SearchBar(
-                onSearch = { /* Handle search query */ },
+                onSearch = { query ->
+                    val queryWords = query.split(" ").filter { it.isNotBlank() }
+                    Log.d("Search Query Words", "Words: $queryWords")
+                    searchedWords.value = queryWords
+                           },
                 modifier = Modifier.fillMaxWidth().padding(8.dp)
             )
 
@@ -200,8 +212,8 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
                     .fillMaxSize()
                     .padding(8.dp)
             ) {
-                items(10) { // Placeholder for 10 items
-                    AssetItemPlaceholder()
+                items(assetList.filter { it.approvalStatus }) { asset ->
+                    AssetItemPlaceholder(asset = asset) { selectedAsset -> navController.navigate("assetDetailsScreen/${selectedAsset.id}?userId=$userId")}
                 }
             }
         }
@@ -215,6 +227,16 @@ fun SearchBar(
     modifier: Modifier = Modifier
 ) {
     var query by remember { mutableStateOf("") }
+
+    // Track delayed query updates
+    LaunchedEffect(query) {
+        snapshotFlow { query }
+            .debounce(2000) // Wait for 2 seconds
+            .collectLatest { debouncedQuery ->
+                onSearch(debouncedQuery) // Pass the updated value after delay
+            }
+    }
+
     OutlinedTextField(
         value = query,
         onValueChange = { query = it },
@@ -321,7 +343,7 @@ fun FilterDropdown(
                                     onCheckedChange = { isChecked ->
                                         if (isChecked) selectedFilters.add(child.name)
                                         else selectedFilters.remove(child.name)
-                                        onFilterChanged(selectedFilters)
+                                        onFilterChanged(selectedFilters.toList())
                                     }
                                 )
                                 Text(
@@ -340,16 +362,57 @@ fun FilterDropdown(
 
 // Asset Item Placeholder
 @Composable
-fun AssetItemPlaceholder() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(text = "Asset Name", style = MaterialTheme.typography.titleMedium)
-            Text(text = "Category: Placeholder", style = MaterialTheme.typography.bodyMedium)
+fun AssetItemPlaceholder(
+    asset: Asset,
+    onAssetClick: (Asset) -> Unit
+) {
+    if (asset.approvalStatus) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .clickable { onAssetClick(asset) },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = "Open Asset Details",
+                tint = Color.Blue
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Asset Name and Address
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = asset.name,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (!asset.address.isNullOrEmpty()) {
+                    Text(
+                        text = asset.address,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Right Arrow Icon
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Open Asset Details",
+                tint = Color.Gray
+            )
         }
     }
 }

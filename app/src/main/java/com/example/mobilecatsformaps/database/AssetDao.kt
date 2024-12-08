@@ -41,21 +41,50 @@ interface AssetDao {
     @RawQuery(observedEntities = [Asset::class])
     fun getAssetsByDynamicQuery(query: SupportSQLiteQuery): Flow<List<Asset>>
 
+
 }
 
-// Helper to build query dynamically
-fun buildDynamicCategoryQuery(selectedCategories: List<String>): SupportSQLiteQuery {
-    if (selectedCategories.isEmpty()) {
-        return SimpleSQLiteQuery("SELECT * FROM assets") // Return all assets if no category is selected
+
+fun buildDynamicQuery(selectedCategories: List<String>, searchWords: List<String>? = null): SupportSQLiteQuery {
+    if (selectedCategories.isEmpty() && searchWords.isNullOrEmpty()) {
+        return SimpleSQLiteQuery("SELECT * FROM assets")
     }
+    val args = mutableListOf<Any>()
     val query = buildString {
         append("SELECT * FROM assets WHERE ")
-        append(
-            selectedCategories.joinToString(" OR ") {
+        Log.d("DynamicQuery", selectedCategories.toString())
+        if (selectedCategories.isNotEmpty()) {
+            append("(")
+            append(
+                selectedCategories.joinToString(" OR ") {
                 "category LIKE '%' || ? || '%'"
+                }
+            )
+            append(")")
+            args.addAll(selectedCategories)
+        }
+
+        if (!searchWords.isNullOrEmpty()) {
+            if (selectedCategories.isNotEmpty()) {
+                append(" AND ")
             }
-        )
+            val likeClauses = searchWords.flatMap { word ->
+                listOf(
+                    "name LIKE ?",
+                    "category LIKE ?",
+                    "address LIKE ?",
+                    "description LIKE ?",
+                    "schedule_recurrence LIKE ?"
+                )
+            }.joinToString(" OR ")
+            append("(" + likeClauses + ")")
+
+            args.addAll(searchWords.flatMap { word ->
+                List(5) { "%$word%" }
+            })
+        }
     }
     Log.d("DynamicQuery", query)
-    return SimpleSQLiteQuery(query, selectedCategories.toTypedArray())
+    Log.d("DynamicQuery", args.toString())
+    return SimpleSQLiteQuery(query, args.toTypedArray())
 }
