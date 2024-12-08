@@ -69,7 +69,13 @@ import com.example.mobilecatsformaps.database.CategorySeeder
 import com.example.mobilecatsformaps.database.buildDynamicQuery
 
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -118,6 +124,9 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val defaultLocation = LatLng(45.383313,-75.733428) //CCHC
     var userLocation by remember { mutableStateOf(defaultLocation) }
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(userLocation, 12f)
+    }
 
     var hasPermission by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -195,15 +204,30 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(300.dp)
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Map View Placeholder",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState
+                ) {
+                    Marker(
+                        state = MarkerState(position = userLocation),
+                        title = "Your Location",
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
+                    )
+                    assetList.filter { it.approvalStatus }.forEach { asset ->
+                        Marker(
+                            state = MarkerState(
+                                position = LatLng(asset.latitude, asset.longitude)
+                            ),
+                            title = asset.name,
+                            snippet = asset.description,
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                        )
+                    }
+                }
             }
 
             // List View
