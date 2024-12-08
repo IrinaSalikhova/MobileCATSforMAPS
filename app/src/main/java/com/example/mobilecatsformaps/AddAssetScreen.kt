@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -302,12 +303,14 @@ fun AddAssetScreen(
                     Toast.LENGTH_SHORT
                 ).show()
                 assetViewModel.submitAsset(asset)
+                navController.navigate("searchScreen")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Submit Asset")
 
         }
+        Spacer(modifier = Modifier.height(26.dp))
     }
 }
 
