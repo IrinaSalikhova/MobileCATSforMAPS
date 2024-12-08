@@ -13,15 +13,11 @@ val myFontFamily = FontFamily(Font(R.font.nunito))
 
 // Define your typography styles
 val Typography = Typography(
+
     displayLarge = TextStyle(
         fontFamily = myFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 36.sp
-    ),
-    displayMedium = TextStyle(
-        fontFamily = myFontFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 30.sp
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 28.sp
     ),
     displaySmall = TextStyle(
         fontFamily = myFontFamily,
