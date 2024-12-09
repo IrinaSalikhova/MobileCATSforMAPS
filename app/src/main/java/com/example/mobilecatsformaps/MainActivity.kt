@@ -36,6 +36,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mobilecatsformaps.database.Asset
 import com.example.mobilecatsformaps.database.AssetDatabase
 import com.example.mobilecatsformaps.navigation.AppNavigation
+import com.example.mobilecatsformaps.navigation.NavigationDrawer
 import com.example.mobilecatsformaps.ui.theme.TextColor
 import com.example.mobilecatsformaps.ui.theme.MobileCATSforMAPSTheme
 import com.example.mobilecatsformaps.ui.theme.myFontFamily
@@ -48,7 +49,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MobileCATSforMAPSTheme {
-                AppNavigation(context = this)
+                NavigationDrawer(context = this)
 
             }
         }

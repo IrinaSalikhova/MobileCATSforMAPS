@@ -52,7 +52,6 @@ fun buildDynamicQuery(selectedCategories: List<String>, searchWords: List<String
     val args = mutableListOf<Any>()
     val query = buildString {
         append("SELECT * FROM assets WHERE ")
-        Log.d("DynamicQuery", selectedCategories.toString())
         if (selectedCategories.isNotEmpty()) {
             append("(")
             append(
@@ -84,7 +83,6 @@ fun buildDynamicQuery(selectedCategories: List<String>, searchWords: List<String
             })
         }
     }
-    Log.d("DynamicQuery", query)
-    Log.d("DynamicQuery", args.toString())
+
     return SimpleSQLiteQuery(query, args.toTypedArray())
 }

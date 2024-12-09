@@ -56,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -151,98 +152,73 @@ fun SearchScreen(navController: NavHostController, userId: String?) {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(
-                    text = "Assets in the area",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
-                ) },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.height(60.dp),
-                actions = {
-                    // Add Asset Button
-                    IconButton(onClick = { navController.navigate("addAssetScreen") }) {
-                        Icon(
-                            imageVector = Icons.Default.Add, // Use a suitable icon like "Add"
-                            contentDescription = "Add New Asset",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
+    ) {
+        // Search Bar
+        SearchBar(
+            onSearch = { query ->
+                val queryWords = query.split(" ").filter { it.isNotBlank() }
+                Log.d("Search Query Words", "Words: $queryWords")
+                searchedWords.value = queryWords
+                       },
+            modifier = Modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        // Filter Dropdown
+        FilterDropdown(
+            categories = categories,
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
+            onFilterChanged = { selected ->
+                selectedCategories.value = selected
+                Log.d("Selected categories:", "Selected categories: $selected") }
+        )
+
+        // Map View Placeholder
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+                .fillMaxWidth()
+                .height(300.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
         ) {
-            // Search Bar
-            SearchBar(
-                onSearch = { query ->
-                    val queryWords = query.split(" ").filter { it.isNotBlank() }
-                    Log.d("Search Query Words", "Words: $queryWords")
-                    searchedWords.value = queryWords
-                           },
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
-            )
-
-            // Filter Dropdown
-            FilterDropdown(
-                categories = categories,
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                onFilterChanged = { selected ->
-                    selectedCategories.value = selected
-                    Log.d("Selected categories:", "Selected categories: $selected") }
-            )
-
-            // Map View Placeholder
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState
             ) {
-                GoogleMap(
-                    modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState
-                ) {
+                Marker(
+                    state = MarkerState(position = userLocation),
+                    title = "Your Location",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
+                )
+                assetList.filter { it.approvalStatus }.forEach { asset ->
                     Marker(
-                        state = MarkerState(position = userLocation),
-                        title = "Your Location",
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)
+                        state = MarkerState(
+                            position = LatLng(asset.latitude, asset.longitude)
+                        ),
+                        title = asset.name,
+                        snippet = asset.description,
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
                     )
-                    assetList.filter { it.approvalStatus }.forEach { asset ->
-                        Marker(
-                            state = MarkerState(
-                                position = LatLng(asset.latitude, asset.longitude)
-                            ),
-                            title = asset.name,
-                            snippet = asset.description,
-                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
-                        )
-                    }
                 }
             }
+        }
 
-            // List View
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-            ) {
-                items(assetList.filter { it.approvalStatus }) { asset ->
-                    AssetItemPlaceholder(asset = asset) { selectedAsset -> navController.navigate("assetDetailsScreen/${selectedAsset.id}?userId=$userId")}
-                }
+        // List View
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
+            items(assetList.filter { it.approvalStatus }) { asset ->
+                AssetItemPlaceholder(asset = asset) { selectedAsset -> navController.navigate("assetDetailsScreen/${selectedAsset.id}?userId=$userId")}
             }
         }
     }
 }
+
 
 // Search Bar Component
 @Composable
