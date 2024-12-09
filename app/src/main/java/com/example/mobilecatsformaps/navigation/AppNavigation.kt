@@ -2,6 +2,7 @@ package com.example.mobilecatsformaps.navigation
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,8 +18,7 @@ import com.example.mobilecatsformaps.database.CategoryViewModel
 
 
 @Composable
-fun AppNavigation(startDestination: String = "searchScreen", context: Context) {
-    val navController = rememberNavController()
+fun AppNavigation(navController: NavHostController = rememberNavController(), startDestination: String = "searchScreen", context: Context) {
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable("searchScreen?userId={userId}") { navBackStackEntry ->
