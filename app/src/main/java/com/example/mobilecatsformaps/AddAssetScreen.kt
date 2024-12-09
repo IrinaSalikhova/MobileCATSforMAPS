@@ -294,8 +294,8 @@ fun AddAssetScreen(
 //                    "status: ${asset.approvalStatus}\nlong: ${asset.longitude}\nlat: ${asset.latitude}",
 //                    Toast.LENGTH_SHORT
 //                ).show()
-//                assetViewModel.submitAsset(asset)
-//                navController.navigate("searchScreen")
+                assetViewModel.submitAsset(asset)
+               navController.navigate("searchScreen")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
