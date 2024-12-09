@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.mobilecatsformaps.database.Asset
+import com.example.mobilecatsformaps.database.AssetDatabase
 import com.example.mobilecatsformaps.database.AssetViewModel
 import com.example.mobilecatsformaps.database.Category
 import com.example.mobilecatsformaps.database.CategoryViewModel
@@ -46,6 +48,8 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -62,23 +66,7 @@ fun AddAssetScreen(
     var assetName by remember { mutableStateOf(TextFieldValue()) }
     var selectedCategory by remember { mutableStateOf<Category?>(null) }
     var expanded by remember { mutableStateOf(false) }
-    val categories = listOf(
-        Category(1, "Administrative support"),
-        Category(2, "Community events"),
-        Category(3, "Transportation"),
-        Category(4, "Community organizations"),
-        Category(5, "Community places"),
-        Category(6, "Health Services"),
-        Category(7, "Social Services"),
-        Category(8, "Food Security"),
-        Category(9, "Basic Needs"),
-        Category(10, "Hobby"),
-        Category(11, "Sport and recreation"),
-        Category(12, "Private services")
-    )
-
     var assetDescription by remember { mutableStateOf(TextFieldValue()) }
-    var assetLocation by remember { mutableStateOf(TextFieldValue()) }
     var assetContact by remember { mutableStateOf(TextFieldValue()) }
     var hoursOfOperation by remember { mutableStateOf(TextFieldValue()) }
     var assetAddress by remember { mutableStateOf(TextFieldValue()) }
@@ -106,11 +94,15 @@ fun AddAssetScreen(
     }
 
     // Fetch categories when the Composable is first composed
+    var categories by remember { mutableStateOf<List<Category>>(emptyList()) }
+    val scope = rememberCoroutineScope()
+    val database = remember { AssetDatabase.getInstance(context) }
+
     LaunchedEffect(Unit) {
-        //categoryViewModel.fetchCategories()
-    }
-    // Use the categories directly from the ViewModel
-    //val categories = listOf("Category 1", "Category 2", "Category 3")
+        scope.launch(Dispatchers.IO) {
+            categories = database.categoryDao().getAllCategories()
+            }
+        }
 
     Column(
         modifier = Modifier
@@ -297,13 +289,13 @@ fun AddAssetScreen(
                     volunteeringOpportunities = assetVolunteeringOpportunities.text
                 )
                 // Show a Toast message with the input values
-                Toast.makeText(
-                    context,
-                    "status: ${asset.approvalStatus}\nlong: ${asset.longitude}\nlat: ${asset.latitude}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                assetViewModel.submitAsset(asset)
-                navController.navigate("searchScreen")
+//                Toast.makeText(
+//                    context,
+//                    "status: ${asset.approvalStatus}\nlong: ${asset.longitude}\nlat: ${asset.latitude}",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//                assetViewModel.submitAsset(asset)
+//                navController.navigate("searchScreen")
             },
             modifier = Modifier.fillMaxWidth()
         ) {
